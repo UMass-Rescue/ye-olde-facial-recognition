@@ -1,9 +1,9 @@
-from src.detector import detect_faces
-from src.utils import show_bboxes
+from face_detector.detector import detect_faces
+from face_detector.utils import show_bboxes
 from PIL import Image
 
 def main():
-    image = Image.open('images/21388.jpg')
+    image = Image.open('test_images/21388.jpg')
     bounding_boxes, landmarks = detect_faces(image)
     image = show_bboxes(image, bounding_boxes, landmarks)
     image.show()
