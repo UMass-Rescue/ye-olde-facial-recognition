@@ -6,4 +6,5 @@ Facial recognition tool that detects faces and will eventually perform age and g
 Weekly progress update slides contained in "progress_updates" folder.
 
 DSFD pre-trained face detector from: https://github.com/hukkelas/DSFD-Pytorch-Inference/.
+
 MTCNN pre-trained face detector from: https://github.com/polarisZhao/mtcnn-pytorch.
