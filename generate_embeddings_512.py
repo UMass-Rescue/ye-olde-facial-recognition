@@ -11,7 +11,7 @@ def main():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # Initialize Inception Resnet V1 pretrained classifier
-    resnet = InceptionResnetV1(pretrained='casia-webface').eval().to(device)
+    resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
     print('Finished loading face encoder!')
 
     # Process each face and generate embeddings
