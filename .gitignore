@@ -1,2 +1,7 @@
-.vscode/
-face_detector/dsfd_inference/dsfd/weights/*
+face_clustering/.vscode/
+face_clustering/face_detector/dsfd_inference/dsfd/weights/*
+
+age_classification/.vscode/
+age_classification/face_detector/dsfd_inference/dsfd/weights/*
+age_classification/images/adult/*
+age_classification/images/child/*
