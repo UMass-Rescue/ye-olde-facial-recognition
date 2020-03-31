@@ -7,10 +7,11 @@ import shutil
 from pathlib import Path
 import dlib
 
-def main():
+
+def cluster_embeddings(encodings_path=None):
     # Load previously generated embeddings
     print("Loading encodings...")
-    data = pickle.loads(open("encodings.pickle", "rb").read())
+    data = pickle.loads(open(Path(encodings_path), "rb").read())
     data = np.array(data)
 
     # Specifically grab the encodings from the data array
@@ -44,7 +45,7 @@ def main():
 
     # Split images into clusters based on labels
     image_paths = [d["image_path"] for d in data]
-    output_folder = Path("test_images/clustered_faces")
+    output_folder = image_paths[0].parent.parent.joinpath("clustered_faces")
     Path(output_folder).mkdir(parents=True, exist_ok=True)
     for i in range(len(image_paths)):
         current_label = labels[i]
@@ -52,7 +53,16 @@ def main():
         new_path = output_folder.joinpath(str(current_label) + "_" + current_file.name)
         shutil.copy(current_file, new_path)
 
+
+def main():
+    # Path to encodings file
+    encodings_file_path = "encodings.pickle"
+
+    # Cluster faces
+    cluster_embeddings(encodings_path=encodings_file_path)
+
     print("Finished!")
+
 
 if __name__ == "__main__":
     main()

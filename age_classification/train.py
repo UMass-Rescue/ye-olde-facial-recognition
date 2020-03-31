@@ -6,6 +6,10 @@ import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 from torch.optim.lr_scheduler import StepLR
 
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+
 from pathlib import Path
 
 from model import get_model
@@ -14,19 +18,23 @@ from model import get_model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Set up dataset
-transform = transforms.Compose([
+train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.RandomRotation((-45, 45)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
+valid_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
-images_root = Path('images')
-dataset = ImageFolder(root=images_root, transform=transform)
-train_len = round(.9 * len(dataset))
-val_len = len(dataset) - train_len
-train_dataset, valid_dataset = torch.utils.data.random_split(dataset, [train_len, val_len])
+train_images_root = Path('training_images/three_class_set/train_images')
+train_dataset = ImageFolder(root=train_images_root, transform=train_transform)
+valid_images_root = Path('training_images/three_class_set/valid_images')
+valid_dataset = ImageFolder(root=valid_images_root, transform=valid_transform)
 
 # Set up dataloaders
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64,
@@ -42,7 +50,8 @@ model = model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Define loss
-criterion = nn.CrossEntropyLoss()
+class_weights = torch.tensor([1/3786, 1/2583, 1/22929], device=device)
+criterion = nn.CrossEntropyLoss(weight=class_weights)
 
 # Scheduler
 scheduler = StepLR(optimizer, step_size=20, gamma=0.5)
@@ -51,8 +60,8 @@ scheduler = StepLR(optimizer, step_size=20, gamma=0.5)
 #  Training
 # ----------
 # Train the network
-best_mae = 9999999
-for epoch in range(101):  # Loop over the dataset multiple times
+best_accuracy = 0.0
+for epoch in range(50):  # Loop over the dataset multiple times
     running_loss = 0.0
     for inputs, labels in train_loader:
         # Get input data and corresponding labels
@@ -76,7 +85,7 @@ for epoch in range(101):  # Loop over the dataset multiple times
 
     # Every set number of epochs, check validation error on
     # validation dataset
-    if epoch % 10 == 0:
+    if epoch % 5 == 0:
         # Set model to evaluation mode for validation
         model.eval()
 
@@ -103,20 +112,26 @@ for epoch in range(101):  # Loop over the dataset multiple times
                 ground_truth.append(labels)
 
         # Calculate mean absolute error for ages
-        preds = torch.cat(preds, dim=0)
-        ground_truth = torch.cat(ground_truth, dim=0)
-        diff = (preds - ground_truth).float()
-        mae = torch.mean(torch.abs(diff))
+        preds = torch.cat(preds, dim=0).cpu().numpy()
+        ground_truth = torch.cat(ground_truth, dim=0).cpu().numpy()
+
+        accuracy = accuracy_score(ground_truth, preds)
+        precision = precision_score(ground_truth, preds, average=None)
+        recall = recall_score(ground_truth, preds, average=None)
 
         # Save best performing model
-        if mae < best_mae:
-            best_mae = mae
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
 
-            trained_model_path = Path('trained_age_recognition_model.pth')
+            trained_model_path = Path('trained_age_classification_model.pth')
             torch.save(model.state_dict(), trained_model_path)
 
         # Print statistics
-        print('Validation accuracy: {:.4f} MAE: {:.4f}'.format(100 * correct / total, mae))
+        print('Accuracy: {:.4f}'.format(accuracy))
+        print('Precision <=12: {:.4f} Precision 13-17: {:.4f} Precision >=18: {:.4f}'.format(
+            precision[0], precision[1], precision[2]))
+        print('Recall <=12: {:.4f} Recall 13-17: {:.4f} Recall >=18: {:.4f}'.format(
+            recall[0], recall[1], recall[2]))
 
         # Set model back to training mode after validation
         model.train()
