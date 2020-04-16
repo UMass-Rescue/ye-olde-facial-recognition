@@ -12,6 +12,7 @@ age_classification/training_images/three_class_set/valid_images/12_or_less/*
 age_classification/training_images/three_class_set/valid_images/13_to_17/*
 age_classification/training_images/three_class_set/valid_images/18_and_above/*
 age_classification/test_images/*
+!age_classification/test_images/three_class_test_images
 age_classification/three_class_trained_age_recognition_model.pth
 
 human_background_segmentation/*
