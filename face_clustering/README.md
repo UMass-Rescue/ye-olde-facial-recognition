@@ -4,17 +4,17 @@ This project allows users to extract faces from a set of images and cluster thos
 Running the scripts in this repository in the order listed below will complete a full pipeline of face detection, extraction, encoding, and lastly, clustering.
 
 ## Requirements
-
- - Python >= 3.6
- - PyTorch
- - Torchvision
- - OpenCV
- - Numpy
- - Pandas
- - Scikit-learn
- - Matplotlib
- - [Dlib](https://pypi.org/project/dlib/)
- - [Face recognition](https://github.com/ageitgey/face_recognition)
+Install [Anaconda](https://www.anaconda.com/distribution/) and set up a Conda virtual environment as follows:
+ 1. Create a new virtual environment: `conda create -n face_clustering python=3.7`
+ 2. Activate the environment: `conda activate face_clustering`
+ 3. Install pip: `conda install pip`
+ 4. Install PyTorch: `conda install pytorch torchvision cudatoolkit=10.1 -c pytorch`
+ 5. Install Scikit-learn: `conda install scikit-learn`
+ 6. Install Matplotlib: `conda install matplotlib`
+ 7. Install Pandas: `conda install pandas`
+ 8. Install OpenCV: `conda install -c conda-forge opencv`
+ 9. Install [Dlib](https://pypi.org/project/dlib/): `pip install dlib`
+ 10. Install [Face recognition](https://github.com/ageitgey/face_recognition): `pip install face_recognition`
 
 ## Step 1: Face Extraction
 

@@ -7,6 +7,7 @@ from torch.utils.data.dataloader import default_collate
 
 from pathlib import Path
 import shutil
+import pandas as pd
 
 from model import get_model
 from classify_faces_dataset import CustomFaceAgeClassificationDataset
@@ -47,6 +48,7 @@ def classify_faces(model_path=None, unclassified_faces_path=None, batch_size=32)
     model = model.to(device)
     model.eval()
 
+    # Process images for predictions, then move them to predicted label folders
     # Label translation 
     label_translation = {
         0: "<= 12",
@@ -64,7 +66,8 @@ def classify_faces(model_path=None, unclassified_faces_path=None, batch_size=32)
     Path(faces_13_to_17).mkdir(parents=True, exist_ok=True)
     Path(faces_18_and_above).mkdir(parents=True, exist_ok=True)
 
-    # Process images for predictions, then move them to predicted label folders
+    output_csv_data = []
+    image_tracker = 0
     for inputs, paths in test_loader:
             # Get input data and corresponding filepaths
             inputs = inputs[0]
@@ -76,6 +79,8 @@ def classify_faces(model_path=None, unclassified_faces_path=None, batch_size=32)
 
             # Copy face images to classification folder based on prediction
             for i in range(len(paths)):
+                image_tracker += 1
+                print('Processing face image {}/{}...'.format(image_tracker, len(test_dataset)))
                 current_prediction = predicted[i].item()
                 current_file_path = paths[i]
 
@@ -89,13 +94,22 @@ def classify_faces(model_path=None, unclassified_faces_path=None, batch_size=32)
                     copy_path = faces_18_and_above.joinpath(current_file_path.name)
                     shutil.copy(current_file_path, copy_path)
 
+                current_face_details = [str(current_file_path), current_prediction]
+                output_csv_data.append(current_face_details)
+    
+    # Generate dataframe with bounding box info
+    all_face_details = pd.DataFrame(output_csv_data, columns=['face_image_path', 'classification_label'])
+
+    # Export dataframe as CSV for processing by embedding generator
+    all_face_details.to_csv('face_classification_labels.csv', encoding='utf-8', index=False)
+
 
 def main():
     # Path to trained age classification model
     model_path = 'three_class_trained_age_recognition_model.pth'
 
     # Path to input images
-    unclassified_faces_path = 'test_images/unclassified_faces'
+    unclassified_faces_path = 'test_images/all_lfw'
 
     # Classify faces
     classify_faces(model_path=model_path, unclassified_faces_path=unclassified_faces_path)
