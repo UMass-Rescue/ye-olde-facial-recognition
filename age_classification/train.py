@@ -18,43 +18,50 @@ from model import get_model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Set up dataset
-train_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.RandomRotation((-45, 45)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-valid_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
+train_transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.RandomRotation((-45, 45)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+valid_transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
 
-train_images_root = Path('training_images/three_class_set/train_images')
+train_images_root = Path("training_images/three_class_set/train_images")
 train_dataset = ImageFolder(root=train_images_root, transform=train_transform)
-valid_images_root = Path('training_images/three_class_set/valid_images')
+valid_images_root = Path("training_images/three_class_set/valid_images")
 valid_dataset = ImageFolder(root=valid_images_root, transform=valid_transform)
 
 # Set up dataloaders
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64,
-                                          shuffle=True, num_workers=0)
-valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=64,
-                                          shuffle=False, num_workers=0) 
+train_loader = torch.utils.data.DataLoader(
+    train_dataset, batch_size=64, shuffle=True, num_workers=0
+)
+valid_loader = torch.utils.data.DataLoader(
+    valid_dataset, batch_size=64, shuffle=False, num_workers=0
+)
 
 # Initialize model
-model = get_model()
+model = (
+    get_model()
+)  # Make sure to change model's # of predicted classes if training for a different number of classes than 3
 model = model.to(device)
 
 # Define optimizer
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Define loss
-class_weights = torch.tensor([1/3786, 1/2583, 1/22929], device=device)
+class_weights = torch.tensor(
+    [1 / 3786, 1 / 2583, 1 / 22929], device=device
+)  # Can add class weights if desired, default is for original three-class training set
 criterion = nn.CrossEntropyLoss(weight=class_weights)
-
-# Scheduler
-scheduler = StepLR(optimizer, step_size=20, gamma=0.5)
 
 # ----------
 #  Training
@@ -79,9 +86,9 @@ for epoch in range(50):  # Loop over the dataset multiple times
 
         # Calculate statistics
         running_loss += loss.item() * inputs.size(0)
-    
+
     epoch_loss = running_loss / len(train_dataset)
-    print('Epoch: {} Loss: {:.4f}'.format(epoch, epoch_loss))
+    print("Epoch: {} Loss: {:.4f}".format(epoch, epoch_loss))
 
     # Every set number of epochs, check validation error on
     # validation dataset
@@ -98,7 +105,7 @@ for epoch in range(50):  # Loop over the dataset multiple times
                 # Get input data and corresponding labels
                 inputs = inputs.to(device)
                 labels = labels.long().to(device)
-                
+
                 # Forward pass
                 outputs = model(inputs)
 
@@ -123,21 +130,23 @@ for epoch in range(50):  # Loop over the dataset multiple times
         if accuracy > best_accuracy:
             best_accuracy = accuracy
 
-            trained_model_path = Path('trained_age_classification_model.pth')
+            trained_model_path = Path("trained_age_classification_model.pth")
             torch.save(model.state_dict(), trained_model_path)
 
         # Print statistics
-        print('Accuracy: {:.4f}'.format(accuracy))
-        print('Precision <=12: {:.4f} Precision 13-17: {:.4f} Precision >=18: {:.4f}'.format(
-            precision[0], precision[1], precision[2]))
-        print('Recall <=12: {:.4f} Recall 13-17: {:.4f} Recall >=18: {:.4f}'.format(
-            recall[0], recall[1], recall[2]))
+        print("Accuracy: {:.4f}".format(accuracy))
+        print(
+            "Precision <=12: {:.4f} Precision 13-17: {:.4f} Precision >=18: {:.4f}".format(
+                precision[0], precision[1], precision[2]
+            )
+        )
+        print(
+            "Recall <=12: {:.4f} Recall 13-17: {:.4f} Recall >=18: {:.4f}".format(
+                recall[0], recall[1], recall[2]
+            )
+        )
 
         # Set model back to training mode after validation
         model.train()
 
-    # Update learning rate
-    # scheduler.step()
-
-
-print('Finished Training')
+print("Finished Training")

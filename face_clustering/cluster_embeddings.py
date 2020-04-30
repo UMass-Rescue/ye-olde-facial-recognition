@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import shutil
 from pathlib import Path
 import dlib
+import time
 
 
 def cluster_embeddings(encodings_path=None):
@@ -59,8 +60,10 @@ def main():
     encodings_file_path = "encodings.pickle"
 
     # Cluster faces
+    start = time.time()
     cluster_embeddings(encodings_path=encodings_file_path)
-
+    end = time.time()
+    print(end - start)
     print("Finished!")
 
 

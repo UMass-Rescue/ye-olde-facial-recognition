@@ -3,6 +3,7 @@ from pathlib import Path
 import pickle
 import numpy as np
 import pandas as pd
+import time
 
 import face_recognition
 
@@ -52,10 +53,11 @@ def main():
     bounding_boxes_path = 'all_face_bounding_boxes.csv'
 
     # Path to input images
-    test_img_folder = "test_images/raw_images_1"
-
+    test_img_folder = "test_images/lotr_cast"
+    start = time.time()
     generate_embeddings(bounding_boxes_path=bounding_boxes_path, input_images_path=test_img_folder)
-
+    end = time.time()
+    print(end - start)
 
 if __name__ == "__main__":
     main()

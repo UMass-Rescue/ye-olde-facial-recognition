@@ -109,7 +109,7 @@ def main():
     model_path = 'three_class_trained_age_recognition_model.pth'
 
     # Path to input images
-    unclassified_faces_path = 'test_images/all_lfw'
+    unclassified_faces_path = 'test_images/kriti_dataset_faces/12_or_less'
 
     # Classify faces
     classify_faces(model_path=model_path, unclassified_faces_path=unclassified_faces_path)

@@ -88,7 +88,7 @@ def main():
     dsfd_weights_path = "face_detector/dsfd_inference/dsfd/weights/WIDERFace_DSFD_RES152.pth"
 
     # Path to input images
-    test_img_folder = "test_images/elementary_school"
+    test_img_folder = "test_images/kriti_dataset/18_and_above"
 
     # Extract faces
     extract_faces(dsfd_weights_path=dsfd_weights_path, input_images_path=test_img_folder, extract_faces=True, save_bounding_boxes=True)
