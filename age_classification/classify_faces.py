@@ -11,7 +11,7 @@ import pandas as pd
 
 from model import get_model
 from classify_faces_dataset import CustomFaceAgeClassificationDataset
-
+import time
 
 def file_path_collate(batch):
     # Custom collate function for dataloader that allows
@@ -109,10 +109,13 @@ def main():
     model_path = 'three_class_trained_age_recognition_model.pth'
 
     # Path to input images
-    unclassified_faces_path = 'test_images/kriti_dataset_faces/12_or_less'
+    unclassified_faces_path = 'test_images/all_lfw'
 
     # Classify faces
+    start = time.time()
     classify_faces(model_path=model_path, unclassified_faces_path=unclassified_faces_path)
+    end = time.time()
+    print(end - start)
 
     print('Finished!')
 
